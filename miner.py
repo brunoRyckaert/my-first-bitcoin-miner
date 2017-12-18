@@ -6,6 +6,10 @@ def hash_256(string):
     return hashlib.sha256(string.encode('utf-8')).hexdigest()
 
 
+def hash_256d(string):
+    return hash_256(hash_256(string))
+
+
 class TransactionGenerator:
     def __init__(self):
         self.random_seed = 0
@@ -26,7 +30,7 @@ class Block:
         self.hash_prev_block = hash_prev_block  # hash of the all previous blocks. used to maintain integrity.
         self.hash_merkle_block = None
         self.target = target
-        self.nounce = 0
+        self.nonce = 0
 
     def add_transaction(self, new_transac):
         if not self.is_block_full():
@@ -41,18 +45,18 @@ class Block:
         return self.is_block_full()
 
     def __str__(self):
-        return '-'.join([self.hash_merkle_block, str(self.nounce)])
+        return '-'.join([self.hash_merkle_block, str(self.nonce)])
 
     def apply_mining_step(self):
-        current_block_hash = hash_256(self.__str__())
-        print('CURRENT_BLOCK_HASH = {}, TARGET = {}'.format(current_block_hash, self.target))
+        current_block_hash = hash_256d(self.__str__())
+        print('NONCE = {},CURRENT_BLOCK_HASH = {}, TARGET = {}'.format(self.nonce, current_block_hash, self.target))
         if int(current_block_hash, 16) < int(self.target, 16):
             print('Block was successfully mined! You will get a reward of x BTC!')
-            print('It took {} steps to mine it.'.format(self.nounce))
+            print('It took {} steps to mine it.'.format(self.nonce))
             return True
         else:
-            # Incrementing the nounce to change current_block_hash to hope to be below the target.
-            self.nounce += 1
+            # Incrementing the nonce to change current_block_hash to hope to be below the target.
+            self.nonce += 1
         return False
 
 
@@ -146,7 +150,7 @@ def my_first_miner():
     print('SUMMARY')
     print('')
     for i, block_added in enumerate(block_chain.block_chain):
-        print('Block #{} was added. It took {} steps to find it.'.format(i, block_added.nounce))
+        print('Block #{} was added. It took {} steps to find it.'.format(i, block_added.nonce))
     print('Difficulty was increased for the last block!')
 
 
